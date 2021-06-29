@@ -1,0 +1,57 @@
+
+plugins {
+    id 'java'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
+}
+
+ext {
+    javaMainClass = "io.github.cmduque.amqp.mock.camel.Main"
+    camelGroupId = 'org.apache.camel'
+    camelVersion = '3.0.0'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': javaMainClass
+    }
+}
+
+shadowJar {
+    zip64 true
+    mergeServiceFiles()
+}
+
+group 'io.github.cmduque.amqp.mock'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+dependencies {
+    compile group: "${camelGroupId}", name: 'camel-main',        version: "${camelVersion}"
+    compile group: "${camelGroupId}", name: 'camel-core',        version: "${camelVersion}"
+    compile group: "${camelGroupId}", name: 'camel-rabbitmq',    version: "${camelVersion}"
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.29'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.29'
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
+    testCompile group: "${camelGroupId}",           name: 'camel-test',              version: "${camelVersion}"
+    testCompile group: 'org.powermock',             name: 'powermock-module-junit4', version: '2.0.2'
+    testCompile group: 'org.powermock',             name: 'powermock-api-mockito2',  version: '2.0.2'
+    testCompile group: 'io.github.cmduque',         name: 'amqp.mock',               version: '0.1'
+}
+
+task runWithJavaExec(type: JavaExec) {
+    group = "Execution"
+    description = "Run the main class with JavaExecTask"
+    classpath = sourceSets.main.runtimeClasspath
+    main = javaMainClass
+}
+
+assemble.dependsOn shadowJar
